@@ -33,8 +33,8 @@ client.connect((err) => {
   });
 
   app.get("/vaccineforuser/:id", (req, res) => {
-    const id = req.params.id;
-    vaccineCollection.find({ user: id }).toArray((err, documents) => {
+    const email = req.params.id;
+    vaccineCollection.find({ email: email }).toArray((err, documents) => {
       res.send(documents);
     });
   });
@@ -53,6 +53,22 @@ client.connect((err) => {
     });
   });
 
+  // app.get("/loginverify/:id", (req, res) => {
+  //   const email = req.params.id;
+  //   adminCollection.find({ email: email }).toArray((err, documents) => {
+  //     if (documents.length) {
+  //       res.send({
+  //         msg: "userFound",
+  //         data: documents[0],
+  //       });
+  //     } else {
+  //       res.send({
+  //         msg: "userNotFound",
+  //       });
+  //     }
+  //   });
+  // });
+
   app.get("/adminList", (req, res) => {
     adminCollection.find().toArray((err, documents) => {
       res.send(documents);
@@ -61,38 +77,79 @@ client.connect((err) => {
 
   app.post("/newvaccine", (req, res) => {
     const vaccine = req.body;
-    vaccineCollection.insertOne(vaccine).then((err, resutl) => {
-      res.send({
-        msg: "success",
-        resutl,
-      });
-      // if (err) {
-      //   res.send({
-      //     msg: "failed",
-      //     result: err,
-      //   });
-      // } else {
-      //   res.send({
-      //     msg: "success",
-      //     resutl,
-      //   });
-      // }
+
+    // if (vaccine.email === "demo@demo.com") {
+    //   const data = {
+    //     name: "demoName",
+    //     certificateNo: vaccine.certificateNo,
+    //     chooseOne: vaccine.chooseOne,
+    //     nid: vaccine.nid,
+    //     birthNo: vaccine.birthNo,
+    //     passportNo: vaccine.passportNo,
+    //     nationality: vaccine.nationality,
+    //     birthDate: vaccine.birthDate,
+    //     gender: vaccine.gender,
+    //     vaccinationBy: vaccine.vaccinationBy,
+    //     firstDoes: vaccine.firstDoes,
+    //     firstDoesName: vaccine.firstDoesName,
+    //     secondDoes: vaccine.secondDoes,
+    //     secondDoesName: vaccine.secondDoesName,
+    //     thirdDoes: vaccine.thirdDoes,
+    //     thirdDoesName: vaccine.thirdDoesName,
+    //     hospitalName: vaccine.hospitalName,
+    //     totalDoesGiven: vaccine.totalDoesGiven,
+    //     vaccineId: vaccine.vaccineId,
+    //   };
+
+    //   vaccineCollection.insertOne(data).then((err, resutl) => {
+    //     res.send({
+    //       msg: "success",
+    //       resutl,
+    //     });
+    //   });
+    // }
+
+    adminCollection.find({ email: vaccine.email }).toArray((err, document) => {
+      if (document.length) {
+        vaccineCollection.insertOne(vaccine).then((err, resutl) => {
+          res.send({ msg: "success", result: resutl });
+        });
+      } else {
+        res.send({ msg: "failed" });
+      }
     });
   });
 
   app.post("/newadmin", (req, res) => {
     const admin = req.body;
-    adminCollection.insertOne(admin).then((resutl) => {
-      res.send(resutl);
-    });
+    const user = req.body.password;
+    if (user === "Murshed@@@k5") {
+      adminCollection.insertOne(admin).then((error, resutl) => {
+        res.send({
+          msg: "success",
+          resutl,
+        });
+      });
+    } else {
+      res.send({ msg: "You Ar Not Allow to add" });
+    }
   });
 
-  app.post("/admin/login", (req, res) => {
+  app.post("/login", (req, res) => {
     const admin = req.body;
     adminCollection
       .find({ email: admin.email, password: admin.password })
       .toArray((err, document) => {
-        res.send(document[0]);
+        if (document.length) {
+          res.send({
+            msg: "userFound",
+            data: document[0],
+          });
+        } else {
+          res.send({
+            msg: "userNotFound",
+          });
+        }
       });
   });
 
