@@ -25,16 +25,14 @@ client.connect((err) => {
   });
 
   app.get("/vaccine", (req, res) => {
-    vaccineCollection
-      .find({ confirmAddmission: true })
-      .toArray((err, documents) => {
-        res.send(documents);
-      });
+    vaccineCollection.find({}).toArray((err, documents) => {
+      res.send(documents);
+    });
   });
 
   app.get("/vaccineforuser/:id", (req, res) => {
-    const email = req.params.id;
-    vaccineCollection.find({ email: email }).toArray((err, documents) => {
+    const id = req.params.id;
+    vaccineCollection.find({ user: id }).toArray((err, documents) => {
       res.send(documents);
     });
   });
@@ -53,65 +51,22 @@ client.connect((err) => {
     });
   });
 
-  // app.get("/loginverify/:id", (req, res) => {
-  //   const email = req.params.id;
-  //   adminCollection.find({ email: email }).toArray((err, documents) => {
-  //     if (documents.length) {
-  //       res.send({
-  //         msg: "userFound",
-  //         data: documents[0],
-  //       });
-  //     } else {
-  //       res.send({
-  //         msg: "userNotFound",
-  //       });
-  //     }
-  //   });
-  // });
-
   app.get("/adminList", (req, res) => {
-    adminCollection.find().toArray((err, documents) => {
+    adminCollection.find({}).toArray((err, documents) => {
       res.send(documents);
     });
   });
 
   app.post("/newvaccine", (req, res) => {
     const vaccine = req.body;
+    const { user } = vaccine;
 
-    // if (vaccine.email === "demo@demo.com") {
-    //   const data = {
-    //     name: "demoName",
-    //     certificateNo: vaccine.certificateNo,
-    //     chooseOne: vaccine.chooseOne,
-    //     nid: vaccine.nid,
-    //     birthNo: vaccine.birthNo,
-    //     passportNo: vaccine.passportNo,
-    //     nationality: vaccine.nationality,
-    //     birthDate: vaccine.birthDate,
-    //     gender: vaccine.gender,
-    //     vaccinationBy: vaccine.vaccinationBy,
-    //     firstDoes: vaccine.firstDoes,
-    //     firstDoesName: vaccine.firstDoesName,
-    //     secondDoes: vaccine.secondDoes,
-    //     secondDoesName: vaccine.secondDoesName,
-    //     thirdDoes: vaccine.thirdDoes,
-    //     thirdDoesName: vaccine.thirdDoesName,
-    //     hospitalName: vaccine.hospitalName,
-    //     totalDoesGiven: vaccine.totalDoesGiven,
-    //     vaccineId: vaccine.vaccineId,
-    //   };
-
-    //   vaccineCollection.insertOne(data).then((err, resutl) => {
-    //     res.send({
-    //       msg: "success",
-    //       resutl,
-    //     });
-    //   });
-    // }
-
-    adminCollection.find({ email: vaccine.email }).toArray((err, document) => {
+    adminCollection.find({ _id: ObjectId(user) }).toArray((err, document) => {
       if (document.length) {
+        const cerNo = document[0].totalCer;
+        const total = parseInt(cerNo) + 1;
         vaccineCollection.insertOne(vaccine).then((err, resutl) => {
+          adminCollection.update({ _id: ObjectId(user) }, { totalCer: total });
           res.send({ msg: "success", result: resutl });
         });
       } else {
@@ -121,15 +76,17 @@ client.connect((err) => {
   });
 
   app.post("/newadmin", (req, res) => {
-    const admin = req.body;
+    const { name, email, customerPassword, totalCer, enable } = req.body;
     const user = req.body.password;
     if (user === "Murshed@@@k5") {
-      adminCollection.insertOne(admin).then((error, resutl) => {
-        res.send({
-          msg: "success",
-          resutl,
+      adminCollection
+        .insertOne({ name, email, customerPassword, totalCer, enable })
+        .then((error, resutl) => {
+          res.send({
+            msg: "success",
+            resutl,
+          });
         });
-      });
     } else {
       res.send({ msg: "You Ar Not Allow to add" });
     }
@@ -137,8 +94,9 @@ client.connect((err) => {
 
   app.post("/login", (req, res) => {
     const admin = req.body;
+
     adminCollection
-      .find({ email: admin.email, password: admin.password })
+      .find({ email: admin.email, customerPassword: admin.customerPassword })
       .toArray((err, document) => {
         if (document.length) {
           res.send({
