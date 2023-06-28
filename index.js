@@ -64,11 +64,13 @@ client.connect((err) => {
     adminCollection.find({ _id: ObjectId(user) }).toArray((err, document) => {
       if (document[0].enable) {
         const cerNo = document[0].totalCer;
+
         const total = parseInt(cerNo) + 1;
+
         vaccineCollection.insertOne(vaccine).then((err, resutl) => {
           adminCollection.updateOne(
             { _id: ObjectId(user) },
-            { totalCer: total }
+            { $set: { totalCer: total } }
           );
           res.send({ msg: "success", result: resutl });
         });
@@ -112,6 +114,40 @@ client.connect((err) => {
           });
         }
       });
+  });
+
+  app.get("/disable/:id", (req, res) => {
+    const id = req.params.id;
+    adminCollection.find({ _id: ObjectId(id) }).toArray((err, documents) => {
+      if (documents.length) {
+        adminCollection
+          .updateOne({ _id: ObjectId(id) }, { $set: { enable: false } })
+          .then((err, document) => {
+            res.send({ document, msg: "success" });
+          });
+      } else {
+        res.send({
+          msg: "failed",
+        });
+      }
+    });
+  });
+
+  app.get("/enable/:id", (req, res) => {
+    const id = req.params.id;
+    adminCollection.find({ _id: ObjectId(id) }).toArray((err, documents) => {
+      if (documents.length) {
+        adminCollection
+          .updateOne({ _id: ObjectId(id) }, { $set: { enable: true } })
+          .then((err, document) => {
+            res.send({ document, msg: "success" });
+          });
+      } else {
+        res.send({
+          msg: "failed",
+        });
+      }
+    });
   });
 
   console.log("connected");
