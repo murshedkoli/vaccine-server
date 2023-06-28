@@ -66,7 +66,10 @@ client.connect((err) => {
         const cerNo = document[0].totalCer;
         const total = parseInt(cerNo) + 1;
         vaccineCollection.insertOne(vaccine).then((err, resutl) => {
-          adminCollection.update({ _id: ObjectId(user) }, { totalCer: total });
+          adminCollection.updateOne(
+            { _id: ObjectId(user) },
+            { totalCer: total }
+          );
           res.send({ msg: "success", result: resutl });
         });
       } else {
