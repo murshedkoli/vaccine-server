@@ -62,7 +62,7 @@ client.connect((err) => {
     const { user } = vaccine;
 
     adminCollection.find({ _id: ObjectId(user) }).toArray((err, document) => {
-      if (document.length) {
+      if (document[0].enable) {
         const cerNo = document[0].totalCer;
         const total = parseInt(cerNo) + 1;
         vaccineCollection.insertOne(vaccine).then((err, resutl) => {
