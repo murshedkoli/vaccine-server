@@ -51,6 +51,13 @@ client.connect((err) => {
     });
   });
 
+  app.get("/singleuser/:id", (req, res) => {
+    const id = req.params.id;
+    adminCollection.find({ _id: ObjectId(user) }).toArray((err, document) => {
+      res.send(document[0]);
+    });
+  });
+
   app.get("/adminList", (req, res) => {
     adminCollection.find({}).toArray((err, documents) => {
       res.send(documents);
@@ -139,6 +146,23 @@ client.connect((err) => {
       if (documents.length) {
         adminCollection
           .updateOne({ _id: ObjectId(id) }, { $set: { enable: true } })
+          .then((err, document) => {
+            res.send({ document, msg: "success" });
+          });
+      } else {
+        res.send({
+          msg: "failed",
+        });
+      }
+    });
+  });
+
+  app.get("/payment/:id", (req, res) => {
+    const id = req.params.id;
+    adminCollection.find({ _id: ObjectId(id) }).toArray((err, documents) => {
+      if (documents.length) {
+        adminCollection
+          .updateOne({ _id: ObjectId(id) }, { $set: { payment: true } })
           .then((err, document) => {
             res.send({ document, msg: "success" });
           });
