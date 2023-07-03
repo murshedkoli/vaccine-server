@@ -51,13 +51,6 @@ client.connect((err) => {
     });
   });
 
-  app.get("/singleuser/:id", (req, res) => {
-    const id = req.params.id;
-    adminCollection.find({ _id: ObjectId(user) }).toArray((err, document) => {
-      res.send(document[0]);
-    });
-  });
-
   app.get("/adminList", (req, res) => {
     adminCollection.find({}).toArray((err, documents) => {
       res.send(documents);
@@ -171,6 +164,13 @@ client.connect((err) => {
           msg: "failed",
         });
       }
+    });
+  });
+
+  app.get("/singleuser/:id", (req, res) => {
+    const id = req.params.id;
+    adminCollection.find({ _id: ObjectId(id) }).toArray((err, documents) => {
+      res.send(documents[0]);
     });
   });
 
